@@ -72,7 +72,7 @@
                     $("#guess-div").show();
                     var your_guess = parseFloat(your_guess);
                     var opponent_guess = parseFloat(opponent_guess);
-                    var average = (your_guess + opponent_guess) / 3 * 2;
+                    var average = (your_guess + opponent_guess) / 3;
                     var your_diff = Math.abs(your_guess - average);
                     var opponent_diff = Math.abs(opponent_guess - average);
                     var result = "tie";
