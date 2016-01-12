@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Bareilles</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+    <style type="text/css">
+        body {
+            color: white;
+            background-color: #74AFAD;
+        }
+
+        #game-hint {
+            text-align: center;
+            margin-top: 5%;
+        }
+
+        .initial-hidden-divs {
+            display: none;
+        }
+
+        #game-container, #log-container {
+            text-align: center;
+            width: 30%;
+            margin-left: 35%;
+            border: solid white 1px;
+            padding: 2%;
+        }
+
+        #game-container {
+            margin-bottom: 1%;
+        }
+
+        #status {
+            margin-bottom: 2%;
+        }
+    </style>
+  </head>
+  <body>
+    
+    <script>
+        var socket;
+        var firstconnect = true;
+        var username;
+        var win = 0;
+        var tie = 0;
+        var lose = 0;
+        
+        function connect() {
+            if(firstconnect) {
+                username = $("#username").val();
+                socket = io.connect(null);
+    
+                // Callbacks for standard socket.io server events
+                socket.on('connect', function(){ $('#status').html('Make a guess between 0 and 100'); });
+                socket.on('disconnect', function(){ $('#status').html('Disconnected from Server'); });
+                socket.on('reconnecting', function( nextRetry ){ $('#status').html('Reconnecting in ' + nextRetry + ' milliseconds');  });
+                socket.on('reconnect_failed', function(){ $('#status').html('Reconnect Failed'); });
+
+                // Callback for the 'chat' event we have defined
+                socket.on('chat', function (opponent, opponent_guess, your_guess) { 
+                    $("#guess-div").show();
+                    var your_guess = parseFloat(your_guess);
+                    var opponent_guess = parseFloat(opponent_guess);
+                    var average = (your_guess + opponent_guess) / 3 * 2;
+                    var your_diff = Math.abs(your_guess - average);
+                    var opponent_diff = Math.abs(opponent_guess - average);
+                    var result = "tie";
+                    if (your_diff < opponent_diff) {
+                        result = "win";
+                        win += 1;
+                    } else if (your_diff > opponent_diff) {
+                        result = "lose";
+                        lose += 1;
+                    } else {
+                        tie += 1;
+                    }
+                    if ($("#messages > div").length >= 10) {
+                        $('#messages div:last-child').remove();
+                    }
+
+                    $('#messages').prepend('<div>You ' + result + ': ' + opponent + ' guesses ' + opponent_guess + ', you guess '+ your_guess + '<br></div>');
+                    $('#win-count').html(win);
+                    $('#tie-count').html(tie);
+                    $('#lose-count').html(lose);
+                    $('#status').html("Make a guess between 0 and 100");
+                });
+
+                socket.on('waiting', function (client) { 
+                    $('#status').html("Waiting for opponent's guess...");
+                });
+                
+                firstconnect = false;
+            }
+            else {
+                socket.socket.reconnect();
+            }
+        }
+        
+        function disconnect() {
+            socket.disconnect();
+        }
+        
+        function send() {
+            guess = parseInt($('#guess').val());
+            if (guess !== NaN && guess >= 0 && guess <= 100) {
+                socket.send({
+                "guess": guess,
+                "username": username  
+                });
+
+                $("#guess-div").hide();
+            } else {
+                alert("please enter an integer in range 0 to 100");
+            }
+        };
+        
+    </script>
+    
+    <h1 id="game-hint">Guess 2/3 of average</h1>
+
+    <div id="game-container">
+        <div id="status">Enter your username below:</div>
+        <div id="connect-div">
+            <input id="username"></input>
+            <button id="connect" onClick='connect()'>Start game</button>
+        </div>
+        <div id="guess-div" class="initial-hidden-divs">
+            <input id="guess"></input>
+            <button id="send" onClick='send()'/>Make guess</button>
+        </div>
+        <div id="stats-div" class="initial-hidden-divs">
+            <br>Win: <span id="win-count">0</span> Lose: <span id="lose-count">0</span> Tie: <span id="tie-count">0</span>
+        </div>
+    </div>
+
+    <div id="log-container" class="initial-hidden-divs">
+        <p>Recent Game Log</p>
+        <div id="messages"></div>
+    </div>
+    
+    <script type="text/javascript">
+        $("#connect").click(function() {
+            $("#connect-div").hide();
+            $(".initial-hidden-divs").show();
+        });
+    </script>
+  </body>
+</html>

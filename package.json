@@ -1,0 +1,31 @@
+{
+  "name": "bareilles",
+  "version": "1.0.0",
+  "description": "Fun multiplayer game to guess 2/3 of the average.",
+  "main": "bareilles.js",
+  "dependencies": {
+    "socket.io": "^1.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node bareilles.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jw2013/Bareilles.git"
+  },
+  "keywords": [
+    "guess",
+    "game"
+  ],
+  "author": "Zhe Wang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jw2013/Bareilles/issues"
+  },
+  "homepage": "https://github.com/jw2013/Bareilles",
+  "engines": {
+    "node": "5.4.0"
+  }
+}
